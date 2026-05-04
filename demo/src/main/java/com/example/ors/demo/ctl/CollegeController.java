@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -24,28 +25,25 @@ public class CollegeController {
     private CollegeServiceInt collegeService;
 
     // 1. SAVE / UPDATE
-    @PostMapping("/save")
-    public ResponseEntity<?> save(@RequestBody CollegeDTO dto, HttpSession session) {
-        UserDTO loggedInUser = (UserDTO) session.getAttribute("user");
-        if (loggedInUser == null) {
-            return new ResponseEntity<>("Please login first", HttpStatus.UNAUTHORIZED);
-        }
-        if (loggedInUser.getRoleId() != RoleDTO.ADMIN) {
-            return new ResponseEntity<>("Only Admins can manage Colleges", HttpStatus.FORBIDDEN);
-        }
-
-        try {
-            if (dto.getId() > 0) {
-                collegeService.update(dto);
-                return new ResponseEntity<>("College updated successfully", HttpStatus.OK);
-            } else {
-                long id = collegeService.add(dto);
-                return new ResponseEntity<>("College added with ID: " + id, HttpStatus.OK);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+   @PostMapping("/save")
+public ResponseEntity<?> save(@RequestBody CollegeDTO dto, @RequestParam(required = false) Long activeRoleId) {
+    // If you aren't using JWT yet, pass roleId from React as a Query Param
+    if (activeRoleId == null || activeRoleId != RoleDTO.ADMIN) {
+        return new ResponseEntity<>("Access Denied: Only Admins can manage Colleges", HttpStatus.FORBIDDEN);
     }
+
+    try {
+        if (dto.getId() != null && dto.getId() > 0) {
+            collegeService.update(dto);
+            return new ResponseEntity<>("College updated successfully", HttpStatus.OK);
+        } else {
+            long id = collegeService.add(dto);
+            return new ResponseEntity<>("College added with ID: " + id, HttpStatus.OK);
+        }
+    } catch (Exception e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+}
 
     // 2. GET BY ID (For viewing details or pre-filling an edit form)
     @GetMapping("/get/{id}")
@@ -84,4 +82,10 @@ public class CollegeController {
             return new ResponseEntity<>("No records found", HttpStatus.OK);
         }
     }
+
+    @GetMapping("/list")
+public ResponseEntity<?> getList() {
+    List<CollegeDTO> list = collegeService.search(new CollegeDTO());
+    return new ResponseEntity<>(list, HttpStatus.OK);
+}
 }

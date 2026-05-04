@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.ors.demo.dao.UserDaoInt;
+import com.example.ors.demo.dto.RoleDTO;
 import com.example.ors.demo.dto.UserDTO;
 import java.util.Optional;
 import java.util.List;
@@ -45,7 +46,9 @@ public class UserServiceImpl implements UserServiceInt{
         // 2. If it exists, throw an error that the Controller can catch
         throw new RuntimeException("Login ID already exists! Please choose another.");
     }
-    
+    if (user.getRoleId() == null || user.getRoleId() == 0) {
+        user.setRoleId(RoleDTO.STUDENT);
+    }
     // 3. If it doesn't exist, save the user
     return userDaoInt.save(user);
     }

@@ -68,4 +68,14 @@ public class StudentController {
         StudentDTO dto = studentService.findById(id);
         return dto != null ? new ResponseEntity<>(dto, HttpStatus.OK) : new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
     }
+
+    @PostMapping("/search")
+public ResponseEntity<?> search(@RequestBody StudentDTO dto) {
+    List<StudentDTO> list = studentService.search(dto);
+    if (list != null && list.size() > 0) {
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    } else {
+        return new ResponseEntity<>("No records found", HttpStatus.OK);
+    }
+}
 }

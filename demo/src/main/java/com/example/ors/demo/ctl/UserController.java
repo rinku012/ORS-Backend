@@ -50,17 +50,24 @@ public ResponseEntity<?> login(@RequestBody UserDTO loginData, HttpSession sessi
         return new ResponseEntity<>("Logout Successful", HttpStatus.OK);
     }
 
-    // SIGNUP: Public registration - Always forced to Student (Role 4)
     @PostMapping("/signUp")
-    public ResponseEntity<?> signUp(@RequestBody UserDTO user) {
-        try {
-            user.setRoleId(RoleDTO.STUDENT); // Use the constant 4L
-            UserDTO registeredUser = userServiceImpl.register(user);
-            return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+public ResponseEntity<?> signUp(@RequestBody UserDTO user) {
+    try {
+        // 1. If the request doesn't specify a role (like a public signup), 
+        //    default it to STUDENT (4L).
+        // 2. If it DOES have a role (like an Admin adding Faculty), 
+        //    it will keep the role sent from React.
+        if (user.getRoleId() == null || user.getRoleId() == 0) {
+            user.setRoleId(RoleDTO.STUDENT);
         }
+
+        UserDTO registeredUser = userServiceImpl.register(user);
+        return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+    } catch (RuntimeException e) {
+        // Returns the "Login ID already exists" message to the frontend
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+}
 
     // SAVE/UPDATE: Admin only. Handles both adding new users and updating existing ones.
     @PostMapping("/save")
