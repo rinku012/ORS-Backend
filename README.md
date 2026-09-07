@@ -3,7 +3,7 @@ Online Reservation System (Backend)
 This is the server-side logic for the Online Result System (ORS), built using the Spring Boot framework. It provides a robust REST API to manage users, bookings, and system data.
 
 Tech Stack
-Framework: Spring Boot (Java)
+Framework: Spring Boot (Java 8,11)
 
 Build Tool: Maven 
 
